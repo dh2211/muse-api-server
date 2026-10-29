@@ -1,0 +1,11 @@
+node_modules
+storage
+logs
+.env
+.env.*
+!.env.example
+*.log
+.git
+.vscode
+.idea
+docs/deploy

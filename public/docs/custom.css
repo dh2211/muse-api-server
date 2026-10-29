@@ -1,0 +1,215 @@
+/* ==========================================================================
+   Muse AI Gateway - Swagger UI Custom Styling
+   ========================================================================== */
+
+:root {
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-cyan: #38bdf8;
+  --accent-indigo: #818cf8;
+  --border-subtle: #334155;
+  --card-radius: 8px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background: #f8fafc;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hide default swagger topbar */
+.swagger-ui .topbar {
+  display: none !important;
+}
+
+/* Custom branded top navigation bar */
+.api-header {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 24px;
+  height: 24px;
+  color: var(--accent-cyan);
+}
+
+.brand-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-version {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.badge-spec {
+  background: rgba(129, 140, 248, 0.15);
+  color: var(--accent-indigo);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+}
+
+.header-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.15s ease;
+}
+
+.nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Swagger UI wrapper adjustments */
+#swagger-ui {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px 60px;
+}
+
+.swagger-ui {
+  font-family: var(--font-family) !important;
+}
+
+.swagger-ui .info {
+  margin: 24px 0 32px 0 !important;
+}
+
+.swagger-ui .info .title {
+  font-family: var(--font-family) !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.02em;
+}
+
+.swagger-ui .info p {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: #475569 !important;
+}
+
+.swagger-ui .scheme-container {
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: var(--card-radius) !important;
+  padding: 16px 20px !important;
+  margin-bottom: 24px !important;
+}
+
+/* Modernize authorization button */
+.swagger-ui .btn.authorize {
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  transition: all 0.15s ease;
+}
+
+.swagger-ui .btn.authorize:hover {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+.swagger-ui .btn.authorize svg {
+  fill: currentColor !important;
+}
+
+/* Operation card blocks */
+.swagger-ui .opblock {
+  border-radius: var(--card-radius) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+  margin: 0 0 12px 0 !important;
+  transition: box-shadow 0.15s ease;
+}
+
+.swagger-ui .opblock:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08) !important;
+}
+
+.swagger-ui .opblock .opblock-summary {
+  padding: 10px 16px !important;
+}
+
+.swagger-ui .opblock .opblock-summary-method {
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+  min-width: 70px !important;
+  text-align: center !important;
+}
+
+.swagger-ui .opblock-tag {
+  font-family: var(--font-family) !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  margin-bottom: 12px !important;
+}
+
+.swagger-ui input[type="text"],
+.swagger-ui textarea,
+.swagger-ui select {
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.swagger-ui .btn {
+  border-radius: 6px !important;
+}

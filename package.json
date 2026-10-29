@@ -1,0 +1,65 @@
+{
+  "name": "muse-api-server",
+  "version": "1.0.0",
+  "description": "Enterprise-grade high-throughput RESTful API gateway for Meta AI Imagine (Text-to-Image, Text-to-Video) & Chat Completions with multi-account pooling (up to 2000 concurrency), self-healing WSS auto-recovery, webhooks, and live web studio.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "private": false,
+  "author": "SuncodeVN.Com <contact@suncodevn.com> (https://suncodevn.com)",
+  "homepage": "https://museai.suncodevn.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/suncodevn/muse-api-server.git"
+  },
+  "engines": {
+    "node": ">=20.12.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "build": "node scripts/build-release.js",
+    "release": "node scripts/build-release.js",
+    "key:create": "node scripts/create-api-key.js",
+    "test:smoke": "node scripts/smoke-test.js",
+    "test:pipeline": "node scripts/pipeline-test.js",
+    "test:architecture": "node --test tests/architecture.test.js",
+    "test:studio": "node --test tests/studio.test.js",
+    "lint:syntax": "node scripts/check-syntax.js"
+  },
+  "keywords": [
+    "meta-ai",
+    "meta-ai-api",
+    "imagine-api",
+    "ai-gateway",
+    "text-to-video",
+    "text-to-image",
+    "video-generation",
+    "image-generation",
+    "chat-completions",
+    "openai-compatible",
+    "reverse-engineered",
+    "websocket-proxy",
+    "high-concurrency",
+    "suncodevn"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.20.0",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "https-proxy-agent": "^9.1.0",
+    "mongoose": "^9.11.2",
+    "multer": "^2.4.0",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "puppeteer-core": "^25.13.0",
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "javascript-obfuscator": "^5.9.0"
+  }
+}

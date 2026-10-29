@@ -1,0 +1,41 @@
+# Local / single-host deployment: API + MongoDB.
+#   cp .env.example .env   # set ADMIN_API_KEY, SIGNING_SECRET, PUBLIC_BASE_URL
+#   docker compose up -d --build
+services:
+  api:
+    build: .
+    image: muse-api-server:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/muse_api
+      STORAGE_DIR: /data/storage
+    ports:
+      - "8080:8080"
+    volumes:
+      - api-storage:/data/storage
+    depends_on:
+      mongo:
+        condition: service_healthy
+    stop_grace_period: 45s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--wiredTigerCacheSizeGB", "1"]
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  api-storage:
+  mongo-data:
