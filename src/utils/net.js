@@ -32,11 +32,50 @@ function isPrivateIPv4(ip) {
   });
 }
 
+function parseIPv6Words(address) {
+  let addr = address.toLowerCase();
+  const lastColon = addr.lastIndexOf(':');
+  if (lastColon !== -1) {
+    const candidate = addr.slice(lastColon + 1);
+    if (net.isIPv4(candidate)) {
+      const octets = candidate.split('.').map(Number);
+      const w1 = ((octets[0] << 8) | octets[1]).toString(16);
+      const w2 = ((octets[2] << 8) | octets[3]).toString(16);
+      addr = addr.slice(0, lastColon) + ':' + w1 + ':' + w2;
+    }
+  }
+  const parts = addr.split('::');
+  if (parts.length > 2) return null;
+  const head = parts[0] ? parts[0].split(':').map(h => parseInt(h, 16)) : [];
+  const tail = parts.length === 2 && parts[1] ? parts[1].split(':').map(h => parseInt(h, 16)) : [];
+  if (parts.length === 1) {
+    if (head.length !== 8) return null;
+    return head;
+  }
+  const fillCount = 8 - (head.length + tail.length);
+  if (fillCount < 0) return null;
+  return [...head, ...new Array(fillCount).fill(0), ...tail];
+}
+
 function isPrivateAddress(address) {
   if (net.isIPv4(address)) return isPrivateIPv4(address);
   if (net.isIPv6(address)) {
     const a = address.toLowerCase();
     if (a === '::' || a === '::1') return true;
+    const words = parseIPv6Words(a);
+    if (words) {
+      // IPv4-mapped (::ffff:0:0/96)
+      const isIPv4Mapped = words[0] === 0 && words[1] === 0 && words[2] === 0 && words[3] === 0 && words[4] === 0 && words[5] === 0xffff;
+      // IPv4-compatible (::/96)
+      const isIPv4Compatible = words[0] === 0 && words[1] === 0 && words[2] === 0 && words[3] === 0 && words[4] === 0 && words[5] === 0;
+      // NAT64 Well-Known Prefix (64:ff9b::/96) or local (64:ff9b:1::/48)
+      const isNAT64 = words[0] === 0x0064 && words[1] === 0xff9b && words[3] === 0 && words[4] === 0 && words[5] === 0 && (words[2] === 0 || words[2] === 1);
+
+      if (isIPv4Mapped || isIPv4Compatible || isNAT64) {
+        const ipv4 = `${words[6] >> 8}.${words[6] & 0xff}.${words[7] >> 8}.${words[7] & 0xff}`;
+        return isPrivateIPv4(ipv4);
+      }
+    }
     if (a.startsWith('::ffff:')) return isPrivateIPv4(a.slice(7));
     return /^(fc|fd|fe8|fe9|fea|feb|ff)/.test(a);
   }
