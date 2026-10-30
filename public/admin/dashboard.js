@@ -266,7 +266,7 @@ async function loadOverview() {
 
     recentBody.innerHTML = data.recent_jobs.map((j) => {
       const outputBtn = j.output?.url
-        ? `<button class="btn btn-primary btn-sm" onclick="previewMedia('${escapeJsAttr(j.output.url)}', '${escapeJsAttr(j.output.mime_type)}', '${escapeJsAttr(j.prompt)}')">Preview</button>`
+        ? `<button class="btn btn-primary btn-sm btn-preview-media" data-url="${escapeHtml(j.output.url)}" data-mime="${escapeHtml(j.output.mime_type || '')}" data-prompt="${escapeHtml(j.prompt || '')}">Preview</button>`
         : '<span style="color: var(--text-dim); font-size: 11px;">—</span>';
 
       return `
@@ -413,7 +413,7 @@ async function loadJobs() {
 
     tbody.innerHTML = list.map((j) => {
       const outputBtn = j.output?.url
-        ? `<button class="btn btn-primary btn-sm" onclick="previewMedia('${escapeJsAttr(j.output.url)}', '${escapeJsAttr(j.output.mime_type)}', '${escapeJsAttr(j.prompt)}')">Preview Output</button>`
+        ? `<button class="btn btn-primary btn-sm btn-preview-media" data-url="${escapeHtml(j.output.url)}" data-mime="${escapeHtml(j.output.mime_type || '')}" data-prompt="${escapeHtml(j.prompt || '')}">Preview Output</button>`
         : '<span style="color: var(--text-dim); font-size: 12px;">—</span>';
 
       const cancelBtn = (j.status === 'queued' || j.status === 'running')
@@ -804,17 +804,48 @@ async function cancelJob(id) {
 }
 
 function previewMedia(url, mimeType, prompt) {
+  let safeUrl = '';
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      safeUrl = parsed.href;
+    }
+  } catch (_) {
+    safeUrl = '';
+  }
+
+  if (!safeUrl) {
+    showToast('Invalid media URL', 'error');
+    return;
+  }
+
   const container = document.getElementById('previewMediaContainer');
   const details = document.getElementById('previewDetails');
   const dlBtn = document.getElementById('btnDownloadMedia');
 
-  dlBtn.href = url;
-  details.innerHTML = `<div><strong>Prompt:</strong> ${escapeHtml(prompt)}</div><div style="margin-top: 4px;"><strong>Format:</strong> ${mimeType}</div>`;
+  dlBtn.href = safeUrl;
+  details.innerHTML = `<div><strong>Prompt:</strong> ${escapeHtml(prompt || '')}</div><div style="margin-top: 4px;"><strong>Format:</strong> ${escapeHtml(mimeType || '')}</div>`;
 
+  container.replaceChildren();
   if (mimeType && mimeType.startsWith('video/')) {
-    container.innerHTML = `<video src="${url}" controls autoplay loop style="max-width: 100%; max-height: 480px; border-radius: 8px;"></video>`;
+    const video = document.createElement('video');
+    video.src = safeUrl;
+    video.controls = true;
+    video.autoplay = true;
+    video.loop = true;
+    video.style.maxWidth = '100%';
+    video.style.maxHeight = '480px';
+    video.style.borderRadius = '8px';
+    container.appendChild(video);
   } else {
-    container.innerHTML = `<img src="${url}" alt="Output Preview" style="max-width: 100%; max-height: 480px; object-fit: contain; border-radius: 8px;">`;
+    const img = document.createElement('img');
+    img.src = safeUrl;
+    img.alt = 'Output Preview';
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '480px';
+    img.style.objectFit = 'contain';
+    img.style.borderRadius = '8px';
+    container.appendChild(img);
   }
 
   openModal('modalMediaPreview');
@@ -869,6 +900,20 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
 
 document.getElementById('filterJobType')?.addEventListener('change', loadJobs);
 document.getElementById('filterJobStatus')?.addEventListener('change', loadJobs);
+
+document.getElementById('overviewRecentJobsBody')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('button.btn-preview-media, button[data-url]');
+  if (btn) {
+    previewMedia(btn.dataset.url, btn.dataset.mime, btn.dataset.prompt);
+  }
+});
+
+document.getElementById('jobsTableBody')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('button.btn-preview-media, button[data-url]');
+  if (btn) {
+    previewMedia(btn.dataset.url, btn.dataset.mime, btn.dataset.prompt);
+  }
+});
 
 // ===========================================================================
 // AI Studio & Playground Controllers

@@ -45,21 +45,26 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^1.20.0",
+    "body-parser": "^2.4.0",
     "cors": "^2.8.6",
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.1",
     "helmet": "^8.3.0",
     "https-proxy-agent": "^9.1.0",
     "mongoose": "^9.11.2",
-    "multer": "^2.4.0",
+    "multer": "^2.5.0",
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
     "puppeteer-core": "^25.13.0",
+    "qs": "^6.17.1",
     "ws": "^8.22.0",
     "zod": "^4.6.7"
   },
+  "overrides": {
+    "body-parser": "^2.4.0",
+    "qs": "^6.17.1"
+  },
   "devDependencies": {
-    "esbuild": "^0.28.2",
-    "javascript-obfuscator": "^5.9.0"
+    "esbuild": "^0.28.2"
   }
 }

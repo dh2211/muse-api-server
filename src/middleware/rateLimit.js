@@ -31,6 +31,10 @@ function handler(req, res, next, options) {
   }));
 }
 
+function shouldSkipIpRateLimit(req) {
+  return req.path.startsWith('/health') || (req.method === 'GET' && req.path.endsWith('/content') && typeof req.query?.signature === 'string');
+}
+
 const ipRateLimit = rateLimit({
   windowMs: WINDOW_MS,
   limit: config.rateLimit.ipPerMinute,
@@ -38,7 +42,7 @@ const ipRateLimit = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => ipKeyGenerator(req.ip || ''),
   // Health checks and signed media downloads are exempt.
-  skip: (req) => req.path.startsWith('/health') || (req.method === 'GET' && typeof req.query?.signature === 'string'),
+  skip: shouldSkipIpRateLimit,
   handler,
   identifier: 'ip'
 });
@@ -54,4 +58,4 @@ const keyRateLimit = rateLimit({
   identifier: 'api-key'
 });
 
-module.exports = { ipRateLimit, keyRateLimit };
+module.exports = { ipRateLimit, keyRateLimit, shouldSkipIpRateLimit };

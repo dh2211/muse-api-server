@@ -571,6 +571,9 @@ test('real Express routes retain health, docs, authentication and validation con
     const adminIndex = await fetch(`${base}/admin/index.html`, { redirect: 'manual' });
     assert.equal(adminIndex.status, 302);
     assert.match(adminIndex.headers.get('location') || '', /^\/admin\/login/);
+    assert.ok(adminIndex.headers.get('content-security-policy'));
+    assert.match(adminIndex.headers.get('content-security-policy'), /default-src 'self'/);
+    assert.match(adminIndex.headers.get('content-security-policy'), /fonts\.googleapis\.com/);
 
     // Random unauthenticated /v1/* paths must collapse to route="unmatched" in /metrics
     await fetch(`${base}/v1/random-probe-${Date.now()}`);
@@ -601,4 +604,35 @@ test('NoiseFrameDecoder evicts stale or excessive partial frames and serializeAc
     { status: 'degraded', connected: false, is_renewing: true, active: { chat: 0, image: 0, video: 0 }, limits: { chat: 4, image: 2, video: 1 }, consecutive_failures: 1, cooldown_until: null }
   );
   assert.equal(serialized.live.is_renewing, true);
+});
+
+test('SSRF filter blocks IPv6 NAT64 prefix and IPv4-compatible IPv6 private ranges', () => {
+  const { isPrivateAddress } = require('../src/utils/net');
+  assert.equal(isPrivateAddress('64:ff9b::127.0.0.1'), true);
+  assert.equal(isPrivateAddress('64:ff9b::7f00:1'), true);
+  assert.equal(isPrivateAddress('64:ff9b::192.168.1.1'), true);
+  assert.equal(isPrivateAddress('64:ff9b::10.0.0.1'), true);
+  assert.equal(isPrivateAddress('64:ff9b::169.254.169.254'), true);
+  assert.equal(isPrivateAddress('64:ff9b::8.8.8.8'), false);
+
+  assert.equal(isPrivateAddress('::127.0.0.1'), true);
+  assert.equal(isPrivateAddress('::7f00:1'), true);
+  assert.equal(isPrivateAddress('::192.168.1.1'), true);
+  assert.equal(isPrivateAddress('::8.8.8.8'), false);
+});
+
+test('ipRateLimit skip logic only exempts /health and signed media downloads on /content', () => {
+  const { shouldSkipIpRateLimit } = require('../src/middleware/rateLimit');
+  assert.equal(typeof shouldSkipIpRateLimit, 'function');
+
+  assert.equal(shouldSkipIpRateLimit({ path: '/health', method: 'GET' }), true);
+  assert.equal(shouldSkipIpRateLimit({ path: '/health/live', method: 'GET' }), true);
+  assert.equal(shouldSkipIpRateLimit({ path: '/v1/files/file_123/content', method: 'GET', query: { signature: 'valid_sig' } }), true);
+  assert.equal(shouldSkipIpRateLimit({ path: '/v1/jobs/job_123/content', method: 'GET', query: { signature: 'valid_sig' } }), true);
+
+  // Non-/content routes with ?signature must NOT be exempted
+  assert.equal(shouldSkipIpRateLimit({ path: '/v1/jobs', method: 'GET', query: { signature: 'bypass' } }), false);
+  assert.equal(shouldSkipIpRateLimit({ path: '/v1/models', method: 'GET', query: { signature: 'bypass' } }), false);
+  assert.equal(shouldSkipIpRateLimit({ path: '/v1/chat/completions', method: 'POST', query: { signature: 'bypass' } }), false);
+  assert.equal(shouldSkipIpRateLimit({ path: '/v1/files/file_123/content', method: 'POST', query: { signature: 'valid_sig' } }), false);
 });
